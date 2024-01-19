@@ -3,7 +3,7 @@ local M = {}
 M.check = function()
   local config = require "jupytext.config"
   vim.health.report_start "jupytext.nvim"
-  vim.fn.system("which " .. vim.shellescape(config.jupytext_path))
+  vim.fn.system("which " .. vim.fn.shellescape(config.jupytext_path))
 
   if vim.v.shell_error == 0 then
     vim.health.report_ok "Jupytext is available"
