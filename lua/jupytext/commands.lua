@@ -1,7 +1,7 @@
 local M = {}
 
-M.run_jupytext_command = function(input_file, options)
-  local cmd = "jupytext " .. input_file .. " "
+M.run_jupytext_command = function(jupytext_path, input_file, options)
+  local cmd = jupytext_path .. " " .. input_file .. " "
   for option_name, option_value in pairs(options) do
     if option_value ~= "" then
       cmd = cmd .. option_name .. "=" .. option_value .. " "

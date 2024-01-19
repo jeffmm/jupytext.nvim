@@ -3,24 +3,22 @@ local utils = require "jupytext.utils"
 
 local M = {}
 
-M.config = {
-  style = "hydrogen",
-  output_extension = "auto",
-  force_ft = nil,
-  custom_language_formatting = {},
-}
-
+M.config = require "jupytext.config"
 local write_to_ipynb = function(event, output_extension)
   local ipynb_filename = event.match
   local jupytext_filename = utils.get_jupytext_file(ipynb_filename, output_extension)
   jupytext_filename = vim.fn.resolve(vim.fn.expand(jupytext_filename))
 
   vim.cmd.write({ jupytext_filename, bang = true })
-  commands.run_jupytext_command(vim.fn.shellescape(jupytext_filename), {
-    ["--update"] = "",
-    ["--to"] = "ipynb",
-    ["--output"] = vim.fn.shellescape(ipynb_filename),
-  })
+  commands.run_jupytext_command(
+    vim.fn.shellescape(M.config.jupytext_path),
+    vim.fn.shellescape(jupytext_filename),
+    {
+      ["--update"] = "",
+      ["--to"] = "ipynb",
+      ["--output"] = vim.fn.shellescape(ipynb_filename),
+    }
+  )
   local buf = vim.api.nvim_get_current_buf()
   vim.api.nvim_set_option_value("modified", false, { buf = buf })
 
@@ -79,10 +77,14 @@ local read_from_ipynb = function(ipynb_filename)
   local filename_exists = vim.fn.filereadable(ipynb_filename)
 
   if filename_exists and not jupytext_file_exists then
-    commands.run_jupytext_command(vim.fn.shellescape(ipynb_filename), {
-      ["--to"] = to_extension_and_style,
-      ["--output"] = vim.fn.shellescape(jupytext_filename),
-    })
+    commands.run_jupytext_command(
+      vim.fn.shellescape(M.config.jupytext_path),
+      vim.fn.shellescape(ipynb_filename),
+      {
+        ["--to"] = to_extension_and_style,
+        ["--output"] = vim.fn.shellescape(jupytext_filename),
+      }
+    )
   end
 
   -- This is when the magic happens and we read the new file into the buffer
