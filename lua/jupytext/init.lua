@@ -1,10 +1,10 @@
 local commands = require "jupytext.commands"
 local utils = require "jupytext.utils"
-local opts = require "jupytext.config"
 
 local M = {}
 
-M.opts = opts
+M.opts = require("jupytext.config").setup().options
+
 local write_to_ipynb = function(event, output_extension)
   local ipynb_filename = event.match
   local jupytext_filename = utils.get_jupytext_file(ipynb_filename, output_extension)
@@ -164,7 +164,7 @@ end
 
 function M.setup(options)
   vim.validate({ options = { options, "table", true } })
-  M.opts = require("jupytext.config").setup(options)
+  M.opts = require("jupytext.config").setup(options).options
 
   vim.validate({
     style = { M.opts.style, "string" },
