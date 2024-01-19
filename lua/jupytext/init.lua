@@ -1,9 +1,10 @@
 local commands = require "jupytext.commands"
 local utils = require "jupytext.utils"
+local opts = require "jupytext.config"
 
 local M = {}
 
-M.config = require "jupytext.config"
+M.opts = opts
 local write_to_ipynb = function(event, output_extension)
   local ipynb_filename = event.match
   local jupytext_filename = utils.get_jupytext_file(ipynb_filename, output_extension)
@@ -11,7 +12,7 @@ local write_to_ipynb = function(event, output_extension)
 
   vim.cmd.write({ jupytext_filename, bang = true })
   commands.run_jupytext_command(
-    vim.fn.shellescape(M.config.jupytext_path),
+    vim.fn.shellescape(M.opts.jupytext_path),
     vim.fn.shellescape(jupytext_filename),
     {
       ["--update"] = "",
@@ -34,20 +35,20 @@ local style_and_extension = function(metadata)
   local output_extension
 
   local custom_formatting = nil
-  if utils.check_key(M.config.custom_language_formatting, metadata.language) then
-    custom_formatting = M.config.custom_language_formatting[metadata.language]
+  if utils.check_key(M.opts.custom_language_formatting, metadata.language) then
+    custom_formatting = M.opts.custom_language_formatting[metadata.language]
   end
 
   if custom_formatting then
     output_extension = custom_formatting.extension
     to_extension_and_style = output_extension .. ":" .. custom_formatting.style
   else
-    if M.config.output_extension == "auto" then
+    if M.opts.output_extension == "auto" then
       output_extension = metadata.extension
     else
-      output_extension = M.config.output_extension
+      output_extension = M.opts.output_extension
     end
-    to_extension_and_style = M.config.output_extension .. ":" .. M.config.style
+    to_extension_and_style = M.opts.output_extension .. ":" .. M.opts.style
   end
 
   return custom_formatting, output_extension, to_extension_and_style
@@ -78,7 +79,7 @@ local read_from_ipynb = function(ipynb_filename)
 
   if filename_exists and not jupytext_file_exists then
     commands.run_jupytext_command(
-      vim.fn.shellescape(M.config.jupytext_path),
+      vim.fn.shellescape(M.opts.jupytext_path),
       vim.fn.shellescape(ipynb_filename),
       {
         ["--to"] = to_extension_and_style,
@@ -121,7 +122,7 @@ local read_from_ipynb = function(ipynb_filename)
     end,
   })
 
-  local ft = M.config.force_ft
+  local ft = M.opts.force_ft
 
   if custom_formatting ~= nil then
     if custom_formatting.force_ft then
@@ -163,11 +164,11 @@ end
 
 M.setup = function(config)
   vim.validate({ config = { config, "table", true } })
-  M.config = vim.tbl_deep_extend("force", M.config, config or {})
+  M.opts = require("jupytext.config").setup(config)
 
   vim.validate({
-    style = { M.config.style, "string" },
-    output_extension = { M.config.output_extension, "string" },
+    style = { M.opts.style, "string" },
+    output_extension = { M.opts.output_extension, "string" },
   })
 
   vim.api.nvim_create_augroup("jupytext-nvim", { clear = true })
