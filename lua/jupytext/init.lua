@@ -162,9 +162,9 @@ local read_from_ipynb = function(ipynb_filename)
   })
 end
 
-M.setup = function(config)
-  vim.validate({ config = { config, "table", true } })
-  M.opts = require("jupytext.config").setup(config)
+function M.setup(options)
+  vim.validate({ options = { options, "table", true } })
+  M.opts = require("jupytext.config").setup(options)
 
   vim.validate({
     style = { M.opts.style, "string" },
